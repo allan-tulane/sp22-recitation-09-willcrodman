@@ -1,19 +1,25 @@
 from collections import deque
 from heapq import heappush, heappop 
 
+def shortest_path(visited, frontier, graph):
+    if len(frontier) == 0:
+        return visited
+    else:
+        distance, node, edge_count = heappop(frontier)
+        if node in visited:
+            return shortest_path(visited, frontier, graph)
+        else:
+            visited[node] = (distance, edge_count)
+            for neighbor, weight in graph[node]:
+              print(distance + weight, neighbor, edge_count)
+              heappush(frontier, (distance + weight, neighbor, edge_count + 1))                
+        return shortest_path(visited, frontier, graph)
+
 def shortest_shortest_path(graph, source):
-    """
-    Params: 
-      graph.....a graph represented as a dict where each key is a vertex
-                and the value is a set of (vertex, weight) tuples (as in the test case)
-      source....the source node
-      
-    Returns:
-      a dict where each key is a vertex and the value is a tuple of
-      (shortest path weight, shortest path number of edges). See test case for example.
-    """
-    ### TODO
-    pass
+    frontier = []
+    visited = dict() 
+    heappush(frontier, (0, source, 0))
+    return shortest_path(visited, frontier, graph)
     
 def test_shortest_shortest_path():
 
@@ -35,13 +41,16 @@ def test_shortest_shortest_path():
     
     
 def bfs_path(graph, source):
-    """
-    Returns:
-      a dict where each key is a vertex and the value is the parent of 
-      that vertex in the shortest path tree.
-    """
-    ###TODO
-    pass
+    result = dict() 
+    frontier = set([source])
+    while len(frontier) != 0:
+        source = frontier.pop()
+        neighbors = graph[source]
+        for leaf in neighbors: 
+          if leaf not in result.keys():
+            frontier.add(leaf)
+            result[leaf] = source
+    return result 
 
 def get_sample_graph():
      return {'s': {'a', 'b'},
@@ -60,15 +69,27 @@ def test_bfs_path():
     assert parents['d'] == 'c'
     
 def get_path(parents, destination):
-    """
-    Returns:
-      The shortest path from the source node to this destination node 
-      (excluding the destination node itself). See test_get_path for an example.
-    """
-    ###TODO
-    pass
+    source = list(parents.values())[0]
+    path = str(source)
+    neighbors = [k for k, v in parents.items() if v == path[-1]]
+  
+    while destination not in neighbors:
+        for leaf in neighbors:
+          if leaf in parents.values():
+            path += leaf
+            neighbors = [k for k, v in parents.items() if v == path[-1]]
+
+    return path
 
 def test_get_path():
     graph = get_sample_graph()
     parents = bfs_path(graph, 's')
     assert get_path(parents, 'd') == 'sbc'
+
+
+graph = {'s': {'a', 'b'},
+            'a': {'b'},
+            'b': {'c'},
+            'c': {'a', 'd'},
+            'd': {}
+            }
